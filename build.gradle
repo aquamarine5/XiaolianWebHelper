@@ -5,11 +5,11 @@ plugins {
 }
 
 group = 'org.aquarngd'
-version = '0.0.1-SNAPSHOT'
+version = '0.1.2'
 
 java {
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(23)
+		languageVersion = JavaLanguageVersion.of(21)
 	}
 }
 

@@ -6,6 +6,7 @@ import org.aquarngd.xiaolianwebhelper.data.WasherDeviceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,6 +19,7 @@ public class WasherHelper {
     @Autowired
     JdbcTemplate jdbcTemplate;
 
+    @CrossOrigin(origins = "*")
     @RequestMapping("/wash")
     public String GetWash(){
         JSONObject jsonObject=new JSONObject();
