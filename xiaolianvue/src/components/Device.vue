@@ -34,9 +34,9 @@ function formatColor(s) {
 }
 var time = defineModel()
 var timer;
-time.value = props.status==2?formatDate(new Date().getTime() - props.tme):""
+time.value = props.status == 2 ? formatDate(new Date().getTime() - props.tme) : ""
 timer = setInterval(function () {
-    time.value =  props.status==2?formatDate(new Date().getTime() - props.tme):""
+    time.value = props.status == 2 ? formatDate(new Date().getTime() - props.tme) : ""
 }, 1000)
 </script>
 
@@ -67,13 +67,15 @@ export default {
 </script>
 
 <style>
-.device_id{
+.device_id {
     font-weight: 600;
     padding-right: 10px;
 }
-.device_name{
-    color:rgb(75, 75, 75)
+
+.device_name {
+    color: rgb(75, 75, 75)
 }
+
 .device_container {
     height: 50px;
 }
@@ -86,12 +88,13 @@ export default {
 }
 
 .device_container_top {
-    display: flex;    
+    display: flex;
     align-items: center;
     padding-bottom: 1px;
 }
-.device_time{
-    display: flex;    
+
+.device_time {
+    display: flex;
     align-items: center;
 }
 </style>

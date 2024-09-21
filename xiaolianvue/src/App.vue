@@ -20,14 +20,14 @@ export default {
     },
     created() {
         this.getDevices()
-        setInterval(()=>{
+        setInterval(() => {
             this.refreshDevices()
-        },10000)
+        }, 10000)
     },
     methods: {
         getDevices() {
             axios.get("http://127.0.0.1:8080/wash")
-                .then(response=>{
+                .then(response => {
                     var json = response.data
                     var out = []
                     json["devices"].forEach(element => {
@@ -39,7 +39,7 @@ export default {
                         }
                     })
                     console.log(out)
-                    this.devicesList=out;
+                    this.devicesList = out;
                 }).catch(function (err) {
                     console.log(err)
                     return [];
@@ -47,12 +47,11 @@ export default {
         },
         refreshDevices() {
             axios.get("http://127.0.0.1:8080/wash")
-                .then(response=> {
+                .then(response => {
                     var json = response.data
                     json["devices"].forEach(element => {
-                        //console.log(this.devicesList[element.id])
-                        this.devicesList[element.id-1].status = element.status
-                        this.devicesList[element.id-1].time = element.time
+                        this.devicesList[element.id - 1].status = element.status
+                        this.devicesList[element.id - 1].time = element.time
                     })
                     console.log("refresh devices")
                 }).catch(function (err) {
