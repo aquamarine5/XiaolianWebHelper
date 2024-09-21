@@ -63,7 +63,7 @@ public class XiaolianwebhelperApplication {
         SpringApplication.run(XiaolianwebhelperApplication.class, args);
     }
 
-    @Scheduled(cron = "0/10 * 10-23 * * ? ")
+    @Scheduled(cron = "0/10 * 13-23 * * ? ")
     public void refreshWasherDevicesData() {
         HttpHeaders httpHeaders = getHttpHeaders();
         HttpEntity<JSONObject> httpEntity = new HttpEntity<>(postData, httpHeaders);

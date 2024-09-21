@@ -1,47 +1,60 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
+import axios from 'axios';
+
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
 
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-    </div>
-  </header>
-
-  <main>
-    <TheWelcome />
-  </main>
 </template>
 
-<style scoped>
-header {
-  line-height: 1.5;
+<script lang="js">
+
+export default {
+    data(){
+        return {
+            devicesList:[]
+        }
+    },
+    mounted(){
+        this.devicesList=this.getDevices()
+    },
+    methods:{
+        getDevices(){
+            axios.get("127.0.0.1:8080/wash")
+                .then(function(response){
+                    var json=JSON.parse(response.data)
+                    var out=[]
+                    json["devices"].forEach(element => {
+                        var m_status=defineModel()
+                        m_status.value=element.status
+                        var m_time=defineModel()
+                        m_time=element.time
+                        out[element.id]={
+                            status:m_status,
+                            time:m_time,
+                            name:element.name
+                        }
+                    })
+                    return out;
+            }).catch(function(err){
+                console.log(err)
+                return out;
+            })
+        },
+        refreshDevices(){
+            axios.get("127.0.0.1:8080/wash")
+                .then(function(response){
+                    var json=JSON.parse(response.data)
+                    json["devices"].forEach(element => {
+                        this.devicesList[element.id].status.value=element.status
+                        this.devicesList[element.id].time=element.time
+                    })
+            }).catch(function(err){
+                console.log(err)
+                return out;
+            })
+        }
+        
+    }
 }
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-}
-</style>
+</script>
