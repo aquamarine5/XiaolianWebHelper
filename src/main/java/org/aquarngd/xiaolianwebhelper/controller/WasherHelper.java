@@ -21,18 +21,43 @@ public class WasherHelper {
 
     @CrossOrigin(origins = "*")
     @RequestMapping("/wash")
-    public String GetWash(){
-        JSONObject jsonObject=new JSONObject();
-        SqlRowSet rs =jdbcTemplate.queryForRowSet("SELECT * FROM `1215856`");
-        JSONArray devicesList=jsonObject.putArray("devices");
-        while(rs.next()){
-            JSONObject device=new JSONObject();
-            device.put("id",rs.getInt("displayNo"));
-            device.put("status",rs.getInt("status"));
-            device.put("name",rs.getString("location"));
-            device.put("time",rs.getTimestamp("lastUsedTime").getTime());
+    public String GetWash() {
+        JSONObject jsonObject = new JSONObject();
+        SqlRowSet rs = jdbcTemplate.queryForRowSet("SELECT * FROM `1215856`");
+        SqlRowSet dataResult = jdbcTemplate.queryForRowSet("SELECT * FROM `data`");
+        JSONArray devicesList = jsonObject.putArray("devices");
+        while (rs.next()) {
+            JSONObject device = new JSONObject();
+            device.put("id", rs.getInt("displayNo"));
+            device.put("status", rs.getInt("status"));
+            device.put("name", rs.getString("location"));
+            device.put("time", rs.getTimestamp("lastUsedTime").getTime());
             devicesList.add(device);
         }
+        jdbcTemplate.execute("UPDATE `data` SET requestTimes = requestsTimes + 1");
+        jsonObject.put("avgWashTime", dataResult.getLong("avgWashTime"));
+        jsonObject.put("avgWashCount", dataResult.getLong("avgWashCount"));
+        jsonObject.put("requestTimes", dataResult.getInt("requestTimes"));
+        return jsonObject.toJSONString();
+    }
+
+    @CrossOrigin(origins = "*")
+    @RequestMapping("/refresh")
+    public String GetWashData() {
+        JSONObject jsonObject = new JSONObject();
+        SqlRowSet rs = jdbcTemplate.queryForRowSet("SELECT * FROM `1215856`");
+        SqlRowSet dataResult = jdbcTemplate.queryForRowSet("SELECT * FROM `data`");
+        JSONArray devicesList = jsonObject.putArray("devices");
+        while (rs.next()) {
+            JSONObject device = new JSONObject();
+            device.put("id", rs.getInt("displayNo"));
+            device.put("status", rs.getInt("status"));
+            device.put("time", rs.getTimestamp("lastUsedTime").getTime());
+            devicesList.add(device);
+        }
+        jsonObject.put("avgWashTime", dataResult.getLong("avgWashTime"));
+        jsonObject.put("avgWashCount", dataResult.getLong("avgWashCount"));
+        jsonObject.put("requestTimes", dataResult.getInt("requestTimes"));
         return jsonObject.toJSONString();
     }
 }

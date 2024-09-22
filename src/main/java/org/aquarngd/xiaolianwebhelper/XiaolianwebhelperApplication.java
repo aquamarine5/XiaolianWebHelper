@@ -1,5 +1,6 @@
 package org.aquarngd.xiaolianwebhelper;
 //Mybatis
+
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import org.aquarngd.xiaolianwebhelper.data.WasherDeviceRepository;
@@ -41,7 +42,7 @@ public class XiaolianwebhelperApplication {
     RestTemplate restTemplate;
     Logger logger;
 
-    HttpHeaders httpHeaders=null;
+    HttpHeaders httpHeaders = null;
 
     public XiaolianwebhelperApplication() {
         logger = LoggerFactory.getLogger(XiaolianwebhelperApplication.class);
@@ -71,17 +72,16 @@ public class XiaolianwebhelperApplication {
     @Async
     @Scheduled(cron = "0/10 * 13-23 * * ? ")
     public void refreshWasherDevicesData() {
-        if(httpHeaders==null) httpHeaders = getHttpHeaders();
+        if (httpHeaders == null) httpHeaders = getHttpHeaders();
         HttpEntity<JSONObject> httpEntity = new HttpEntity<>(postData, httpHeaders);
-        JSONObject body=null;
-        try{
+        JSONObject body = null;
+        try {
             body = restTemplate.postForEntity("https://netapi.xiaolianhb.com/m/net/stu/residence/listDevice", httpEntity, JSONObject.class).getBody();
-        }
-        catch (HttpClientErrorException e){
-            if(e.getStatusCode()== HttpStatusCode.valueOf(401)){
-                body=loginAndResend();
+        } catch (HttpClientErrorException e) {
+            if (e.getStatusCode() == HttpStatusCode.valueOf(401)) {
+                body = loginAndResend();
             }
-            logger.info("error: {}",e.getResponseBodyAsString());
+            logger.info("error: {}", e.getResponseBodyAsString());
         }
         logger.info("post http.");
 
@@ -94,29 +94,36 @@ public class XiaolianwebhelperApplication {
             }
         }
     }
-    private JSONObject loginAndResend(){
-        if (!isDatabaseExisted("data")) {
-            jdbcTemplate.execute("""
-                    CREATE TABLE xiaolian.data (
-                    accessToken TEXT NOT NULL,
-                    refreshToken TEXT NOT NULL
-                    ) CHARACTER SET utf8mb4""");
-        }
-        HttpHeaders headers=new HttpHeaders();
+
+    private void createDataDatabase() {
+
+        jdbcTemplate.execute("""
+                CREATE TABLE xiaolian.data (
+                accessToken TEXT NOT NULL,
+                refreshToken TEXT NOT NULL,
+                avgWashCount INT DEFAULT 0,
+                avgWashTime LONG DEFAULT 0,
+                requestTimes INT DEFAULT 0
+                ) CHARACTER SET utf8mb4""");
+    }
+
+    private JSONObject loginAndResend() {
+        if (!isDatabaseExisted("data")) createDataDatabase();
+        HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         //logger.info("post data: {}",getLoginJsonObject().toJSONString());
         HttpEntity<JSONObject> httpEntity = new HttpEntity<>(getLoginJsonObject(), headers);
-        ResponseEntity<JSONObject> responseEntity= restTemplate.postForEntity("https://mapi.xiaolianhb.com/mp/login",httpEntity,JSONObject.class);
+        ResponseEntity<JSONObject> responseEntity = restTemplate.postForEntity("https://mapi.xiaolianhb.com/mp/login", httpEntity, JSONObject.class);
         logger.info("try re-login.");
-        JSONObject response=responseEntity.getBody();
-        if(response!=null){
-            logger.info("sql: login response: {}",response.toJSONString());
-            String accessToken=response.getJSONObject("data").getString("accessToken");
-            String refreshToken=response.getJSONObject("data").getString("refreshToken");
-            jdbcTemplate.execute("UPDATE `data` SET accessToken = '"+accessToken+"'");
-            jdbcTemplate.execute("UPDATE `data` SET refreshToken = '"+refreshToken+"'");
-            httpHeaders.set("accessToken",accessToken);
-            httpHeaders.set("refreshToken",refreshToken);
+        JSONObject response = responseEntity.getBody();
+        if (response != null) {
+            logger.info("sql: login response: {}", response.toJSONString());
+            String accessToken = response.getJSONObject("data").getString("accessToken");
+            String refreshToken = response.getJSONObject("data").getString("refreshToken");
+            jdbcTemplate.execute("UPDATE `data` SET accessToken = '" + accessToken + "'");
+            jdbcTemplate.execute("UPDATE `data` SET refreshToken = '" + refreshToken + "'");
+            httpHeaders.set("accessToken", accessToken);
+            httpHeaders.set("refreshToken", refreshToken);
         }
         HttpEntity<JSONObject> httpPostEntity = new HttpEntity<>(postData, httpHeaders);
         ResponseEntity<JSONObject> postResponse = restTemplate.postForEntity("https://netapi.xiaolianhb.com/m/net/stu/residence/listDevice", httpPostEntity, JSONObject.class);
@@ -124,38 +131,34 @@ public class XiaolianwebhelperApplication {
     }
 
     private static JSONObject getLoginJsonObject() {
-        JSONObject loginData=new JSONObject();
-        loginData.put("appList",new JSONArray());
-        loginData.put("mobile","19030827318");
-        loginData.put("password","070304syz");
-        loginData.put("appVersion","1.4.8");
-        loginData.put("system","2");
-        loginData.put("model","DCO-AL00");
-        loginData.put("lon","");
-        loginData.put("appSource","1");
-        loginData.put("systemVersion","12");
-        loginData.put("brand","HUAWEI");
-        loginData.put("uniqueId","8c185942d3b9cf82");
-        loginData.put("lat","");
+        JSONObject loginData = new JSONObject();
+        loginData.put("appList", new JSONArray());
+        loginData.put("mobile", "19030827318");
+        loginData.put("password", "070304syz");
+        loginData.put("appVersion", "1.4.8");
+        loginData.put("system", "2");
+        loginData.put("model", "DCO-AL00");
+        loginData.put("lon", "");
+        loginData.put("appSource", "1");
+        loginData.put("systemVersion", "12");
+        loginData.put("brand", "HUAWEI");
+        loginData.put("uniqueId", "8c185942d3b9cf82");
+        loginData.put("lat", "");
         return loginData;
     }
 
     private HttpHeaders getHttpHeaders() {
         if (!isDatabaseExisted("data")) {
-            jdbcTemplate.execute("""
-                    CREATE TABLE xiaolian.data (
-                    accessToken TEXT NOT NULL,
-                    refreshToken TEXT NOT NULL
-                    ) CHARACTER SET utf8mb4""");
+            createDataDatabase();
             logger.debug("sql: create data table");
             jdbcTemplate.execute(String.format("INSERT INTO `data` (accessToken,refreshToken) VALUES ('%s', '%s')",
                     "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI1NzQ1ODcwIiwib3MiOiIwIiwiaXNzIjoiaHR0cHM6Ly94aWFvbGlhbi5pbyIsImlhdCI6MTcyNjkwODcyOSwiZXhwIjoxNzI2OTI2NzI5fQ.WK85D2fwxnd6SsWs8KKBKhm75nBki8C7q_Cs331iazIFo6Ji5JxW7lC2wVkBHcd4XoAnFMI9tUWpOI5rXBMVpg",
                     "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI1NzQ1ODcwIiwib3MiOiIwIiwiaXNzIjoiaHR0cHM6Ly94aWFvbGlhbi5pbyIsImlhdCI6MTcyNjkwODcyOSwiZXhwIjoxNzI4MjA0NzI5fQ.Bv2wkS8m7O2gHOfDjxFPRHpBgis4KbXO1R-_Kp0ly3ohPjL9hDQWev66_XjGU0DrnS59B5ZWG0MSh7aPi86SBg"));
 
         }
-        SqlRowSet rs=jdbcTemplate.queryForRowSet("SELECT * FROM `data`");
+        SqlRowSet rs = jdbcTemplate.queryForRowSet("SELECT * FROM `data`");
         HttpHeaders httpHeaders = new HttpHeaders();
-        if(rs.next()){
+        if (rs.next()) {
             httpHeaders.set("accessToken", rs.getString("accessToken"));
             httpHeaders.set("refreshToken", rs.getString("refreshToken"));
         }
@@ -180,6 +183,11 @@ public class XiaolianwebhelperApplication {
         if (rs.next()) {
             if (WasherStatus.valueOf(rs.getInt("status")) == WasherStatus.NOT_USING &&
                     WasherStatus.valueOf(deviceObject.getInteger("deviceStatus")) == WasherStatus.USING) {
+                long time = System.currentTimeMillis() - rs.getTimestamp("lastUsedTime").getTime();
+                SqlRowSet rrs = jdbcTemplate.queryForRowSet("SELECT * FROM `data`");
+                long newAvgTime = (rrs.getLong("avgWashTime") + time) / (rrs.getInt("avgWashCount") + 1);
+                jdbcTemplate.execute("UPDATE `data` SET avgWashTime = " + newAvgTime);
+                jdbcTemplate.execute("UPDATE `data` SET avgWashCount = avgWashCount + 1");
                 jdbcTemplate.execute("UPDATE `1215856` SET lastUsedTime = NOW() WHERE deviceId = " + deviceObject.getInteger("deviceId"));
                 logger.info("sql: run sql update lastUsedTime");
             }
