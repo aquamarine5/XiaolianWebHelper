@@ -86,7 +86,7 @@ public class XiaolianwebhelperApplication {
         logger.info("post http.");
 
         if (body != null) {
-            logger.info("data: {}", body.toJSONString());
+            //logger.info("data: {}", body.toJSONString());
             JSONArray deviceList = body.getJSONObject("data").getJSONArray("deviceInListInfo");
             for (int i = 0; i < deviceList.size(); i++) {
                 JSONObject deviceObject = deviceList.getJSONObject(i);
@@ -104,7 +104,7 @@ public class XiaolianwebhelperApplication {
         }
         HttpHeaders headers=new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        logger.info("post data: {}",getLoginJsonObject().toJSONString());
+        //logger.info("post data: {}",getLoginJsonObject().toJSONString());
         HttpEntity<JSONObject> httpEntity = new HttpEntity<>(getLoginJsonObject(), headers);
         ResponseEntity<JSONObject> responseEntity= restTemplate.postForEntity("https://mapi.xiaolianhb.com/mp/login",httpEntity,JSONObject.class);
         logger.info("try re-login.");

@@ -26,7 +26,7 @@ export default {
     },
     methods: {
         getDevices() {
-            axios.get("http://127.0.0.1:8080/wash")
+            axios.get("http://47.96.24.132/api/wash")
                 .then(response => {
                     var json = response.data
                     var out = []
@@ -46,7 +46,7 @@ export default {
                 })
         },
         refreshDevices() {
-            axios.get("http://127.0.0.1:8080/wash")
+            axios.get("http://47.96.24.132/api/wash")
                 .then(response => {
                     var json = response.data
                     json["devices"].forEach(element => {
