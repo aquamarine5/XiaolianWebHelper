@@ -9,7 +9,7 @@ import Device from './components/Device.vue';
         Github项目链接
     </a>
     <div>
-        当前统计洗浴次数：{{ data.washCount }}，平均洗浴时间：{{ data.avgWashTimeText }}，第{{ data.requestTimes }} 使用本工具。
+        当前统计洗浴次数：{{ data.washCount }}，平均洗浴时间：{{ data.avgWashTimeText }}，第 {{ data.requestTimes }} 个使用本工具。
     </div>
     <div class="app_container" v-for="device in devicesList">
         <Device :name="device.name" :id="device.id" :status="device.status" :tme="device.time" />

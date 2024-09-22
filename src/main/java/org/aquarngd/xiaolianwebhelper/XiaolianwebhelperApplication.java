@@ -189,12 +189,19 @@ public class XiaolianwebhelperApplication {
             if (WasherStatus.valueOf(rs.getInt("status")) == WasherStatus.USING &&
                     WasherStatus.valueOf(deviceObject.getInteger("deviceStatus")) == WasherStatus.NOT_USING){
                 long time = System.currentTimeMillis() - rs.getTimestamp("lastUsedTime").getTime();
-                SqlRowSet rrs = jdbcTemplate.queryForRowSet("SELECT * FROM `data`");
-                rrs.next();
-                long newAvgTime = (rrs.getLong("avgWashTime") + time) / (rrs.getInt("avgWashCount") + 1);
-                jdbcTemplate.execute("UPDATE `data` SET avgWashTime = " + newAvgTime);
-                jdbcTemplate.execute("UPDATE `data` SET avgWashCount = avgWashCount + 1");
-                logger.info("sql: update avgWashTime");
+                if(time<=3600000L){
+
+                    SqlRowSet rrs = jdbcTemplate.queryForRowSet("SELECT * FROM `data`");
+                    rrs.next();
+                    int count=rrs.getInt("avgWashCount");
+                    long newAvgTime = (rrs.getLong("avgWashTime")*count + time) / (count + 1);
+                    jdbcTemplate.execute("UPDATE `data` SET avgWashTime = " + newAvgTime);
+                    jdbcTemplate.execute("UPDATE `data` SET avgWashCount = avgWashCount + 1");
+                    logger.info("sql: update avgWashTime");
+                }
+                else{
+                    logger.warn("sql: pass time too large: {}",time);
+                }
             }
             jdbcTemplate.execute("UPDATE `1215856` SET status = " + deviceObject.getInteger("deviceStatus") + " WHERE deviceId = " + deviceObject.getInteger("deviceId"));
         } else {
