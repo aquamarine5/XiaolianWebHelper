@@ -102,7 +102,7 @@ public class XiaolianwebhelperApplication {
                 accessToken TEXT NOT NULL,
                 refreshToken TEXT NOT NULL,
                 avgWashCount INT DEFAULT 0,
-                avgWashTime LONG DEFAULT 0,
+                avgWashTime BIGINT DEFAULT 0,
                 requestTimes INT DEFAULT 0
                 ) CHARACTER SET utf8mb4""");
     }
@@ -183,13 +183,18 @@ public class XiaolianwebhelperApplication {
         if (rs.next()) {
             if (WasherStatus.valueOf(rs.getInt("status")) == WasherStatus.NOT_USING &&
                     WasherStatus.valueOf(deviceObject.getInteger("deviceStatus")) == WasherStatus.USING) {
+                jdbcTemplate.execute("UPDATE `1215856` SET lastUsedTime = NOW() WHERE deviceId = " + deviceObject.getInteger("deviceId"));
+                logger.info("sql: run sql update lastUsedTime");
+            }
+            if (WasherStatus.valueOf(rs.getInt("status")) == WasherStatus.USING &&
+                    WasherStatus.valueOf(deviceObject.getInteger("deviceStatus")) == WasherStatus.NOT_USING){
                 long time = System.currentTimeMillis() - rs.getTimestamp("lastUsedTime").getTime();
                 SqlRowSet rrs = jdbcTemplate.queryForRowSet("SELECT * FROM `data`");
+                rrs.next();
                 long newAvgTime = (rrs.getLong("avgWashTime") + time) / (rrs.getInt("avgWashCount") + 1);
                 jdbcTemplate.execute("UPDATE `data` SET avgWashTime = " + newAvgTime);
                 jdbcTemplate.execute("UPDATE `data` SET avgWashCount = avgWashCount + 1");
-                jdbcTemplate.execute("UPDATE `1215856` SET lastUsedTime = NOW() WHERE deviceId = " + deviceObject.getInteger("deviceId"));
-                logger.info("sql: run sql update lastUsedTime");
+                logger.info("sql: update avgWashTime");
             }
             jdbcTemplate.execute("UPDATE `1215856` SET status = " + deviceObject.getInteger("deviceStatus") + " WHERE deviceId = " + deviceObject.getInteger("deviceId"));
         } else {

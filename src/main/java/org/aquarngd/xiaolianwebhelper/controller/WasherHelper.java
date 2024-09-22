@@ -34,10 +34,13 @@ public class WasherHelper {
             device.put("time", rs.getTimestamp("lastUsedTime").getTime());
             devicesList.add(device);
         }
-        jdbcTemplate.execute("UPDATE `data` SET requestTimes = requestsTimes + 1");
-        jsonObject.put("avgWashTime", dataResult.getLong("avgWashTime"));
-        jsonObject.put("avgWashCount", dataResult.getLong("avgWashCount"));
-        jsonObject.put("requestTimes", dataResult.getInt("requestTimes"));
+        if(dataResult.next()){
+
+            jdbcTemplate.execute("UPDATE `data` SET requestTimes = requestTimes + 1");
+            jsonObject.put("avgWashTime", dataResult.getLong("avgWashTime"));
+            jsonObject.put("avgWashCount", dataResult.getLong("avgWashCount"));
+            jsonObject.put("requestTimes", dataResult.getInt("requestTimes"));
+        }
         return jsonObject.toJSONString();
     }
 
@@ -55,9 +58,12 @@ public class WasherHelper {
             device.put("time", rs.getTimestamp("lastUsedTime").getTime());
             devicesList.add(device);
         }
-        jsonObject.put("avgWashTime", dataResult.getLong("avgWashTime"));
-        jsonObject.put("avgWashCount", dataResult.getLong("avgWashCount"));
-        jsonObject.put("requestTimes", dataResult.getInt("requestTimes"));
+        if(dataResult.next()){
+
+            jsonObject.put("avgWashTime", dataResult.getLong("avgWashTime"));
+            jsonObject.put("avgWashCount", dataResult.getLong("avgWashCount"));
+            jsonObject.put("requestTimes", dataResult.getInt("requestTimes"));
+        }
         return jsonObject.toJSONString();
     }
 }

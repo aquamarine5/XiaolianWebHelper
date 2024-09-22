@@ -23,9 +23,9 @@ function formatDate(t) {
     minutes = (minutes < 10) ? "0" + minutes : minutes
     seconds = (seconds < 10) ? "0" + seconds : seconds
     if (hours == "00")
-        return minutes + " 分 " + seconds
+        return minutes + " 分 " + seconds + " 秒"
 
-    return hours + " 时 " + minutes + " 秒 " + seconds
+    return hours + " 时 " + minutes + " 分 " + seconds + " 秒"
 }
 function formatColor(s) {
     if (s == 1) return '#000'
