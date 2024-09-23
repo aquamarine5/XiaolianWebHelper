@@ -24,6 +24,8 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.sql.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 @EnableAsync
@@ -43,6 +45,8 @@ public class XiaolianwebhelperApplication {
     Logger logger;
 
     HttpHeaders httpHeaders = null;
+
+    Map<Integer,JSONObject> postDataMaps= new HashMap<>();
 
     public XiaolianwebhelperApplication() {
         logger = LoggerFactory.getLogger(XiaolianwebhelperApplication.class);
@@ -67,6 +71,10 @@ public class XiaolianwebhelperApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(XiaolianwebhelperApplication.class, args);
+    }
+
+    private JSONObject getPostData(int id){
+
     }
 
     @Async
