@@ -175,7 +175,8 @@ public class XiaolianwebhelperApplication {
                     location VARCHAR(50) NOT NULL,
                     displayNo INT NOT NULL,
                     status INT NOT NULL,
-                    lastUsedTime TIMESTAMP NOT NULL
+                    lastUsedTime TIMESTAMP NOT NULL,
+                    lastWashTime TIMESTAMP NOT NULL
                     ) CHARACTER SET utf8mb4""");
             logger.info("sql: create xiaolian table");
         }
@@ -190,13 +191,13 @@ public class XiaolianwebhelperApplication {
                     WasherStatus.valueOf(deviceObject.getInteger("deviceStatus")) == WasherStatus.NOT_USING){
                 long time = System.currentTimeMillis() - rs.getTimestamp("lastUsedTime").getTime();
                 if(time<=3600000L){
-
                     SqlRowSet rrs = jdbcTemplate.queryForRowSet("SELECT * FROM `data`");
                     rrs.next();
                     int count=rrs.getInt("avgWashCount");
                     long newAvgTime = (rrs.getLong("avgWashTime")*count + time) / (count + 1);
                     jdbcTemplate.execute("UPDATE `data` SET avgWashTime = " + newAvgTime);
                     jdbcTemplate.execute("UPDATE `data` SET avgWashCount = avgWashCount + 1");
+                    jdbcTemplate.execute("UPDATE `1215856` SET lastWashTime = NOW() WHERE deviceId = "+deviceObject.getInteger("deviceId"));
                     logger.info("sql: update avgWashTime");
                 }
                 else{

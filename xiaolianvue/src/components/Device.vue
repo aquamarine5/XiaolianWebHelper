@@ -12,6 +12,9 @@ const props = defineProps({
     },
     tme: {
         type: Number
+    },
+    wtime:{
+        type:Number
     }
 })
 function formatDate(t) {
@@ -28,15 +31,29 @@ function formatDate(t) {
     return hours + " 时 " + minutes + " 分 " + seconds + " 秒"
 }
 function formatColor(s) {
-    if (s == 1) return '#000'
+    if (s == 1) return '#A9A9A9'
     else if (s == 2) return '#00F'
     else return '#FF0'
 }
-var time = defineModel()
+function parseStatus(){
+    if(props.status==1){
+        tipstext.value="距离上次启用过去了："
+        time.value=formatDate(new Date().getTime()-props.wtime)
+    }
+    else if(props.status==2){
+        tipstext.value="已经洗了："
+        time.value=formatDate(new Date().getTime()-props.tme)
+    }else{
+        tipstext.value="Oops! 已故障。"
+    }
+}
+var tipstext=defineModel('tipstext')
+tipstext.value="已经洗了："
+var time = defineModel('time')
 var timer;
-time.value = props.status == 2 ? formatDate(new Date().getTime() - props.tme) : ""
+parseStatus()
 timer = setInterval(function () {
-    time.value = props.status == 2 ? formatDate(new Date().getTime() - props.tme) : ""
+    parseStatus()
 }, 1000)
 </script>
 
@@ -48,7 +65,7 @@ timer = setInterval(function () {
             <div class="device_name">{{ props.name }}</div>
         </div>
         <div class="device_time">
-            <div class="device_time_text">已经洗了：</div>
+            <div class="device_time_text">{{ tipstext }}</div>
             <div class="device_time_dynamic">{{ time }}</div>
         </div>
     </div>

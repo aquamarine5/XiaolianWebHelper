@@ -31,6 +31,7 @@ public class WasherHelper {
             device.put("id", rs.getInt("displayNo"));
             device.put("status", rs.getInt("status"));
             device.put("name", rs.getString("location"));
+            device.put("wtime",rs.getTimestamp("lastWashTime").getTime());
             device.put("time", rs.getTimestamp("lastUsedTime").getTime());
             devicesList.add(device);
         }
@@ -56,6 +57,8 @@ public class WasherHelper {
             device.put("id", rs.getInt("displayNo"));
             device.put("status", rs.getInt("status"));
             device.put("time", rs.getTimestamp("lastUsedTime").getTime());
+
+            device.put("wtime",rs.getTimestamp("lastWashTime").getTime());
             devicesList.add(device);
         }
         if(dataResult.next()){
