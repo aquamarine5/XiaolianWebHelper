@@ -54,7 +54,7 @@ var timer;
 parseStatus()
 timer = setInterval(function () {
     parseStatus()
-}, 1000)
+}, 10000)
 </script>
 
 <template>

@@ -1,10 +1,14 @@
 <script setup lang="js">
 import axios from 'axios';
 import Device from './components/Device.vue';
+import SuggestedDevice from './components/SuggestedDevice.vue';
+
 var washCount = defineModel('washCount')
 var avgWashTimeText = defineModel('avgWashTimeText')
 var requestTimes = defineModel('requestTimes')
 var devicesList=[]
+var suggestedWaitDevicesList=[]
+var suggestedTryDevicesList=[]
 
 function formatDate(t) {
     var seconds = Math.floor((t / 1000) % 60),
@@ -37,9 +41,19 @@ function getDevices() {
             washCount.value = json.avgWashCount
             avgWashTimeText.value = formatDate(json.avgWashTime)
             requestTimes.value = json.requestTimes
-
             console.log(out)
             devicesList = out;
+            out.forEach(element=>{
+                if(element.status==1 && (new Date().getTime()-element.wtime)>360000 && suggestedTryDevicesList.length<6){
+                    suggestedTryDevicesList.push(element)
+                }
+                if(element.status==2 && (new Date().getTime()-element.time)>json.avgWashTime && suggestedWaitDevicesList.length<6){
+                    suggestedWaitDevicesList.push(element)
+                }
+            })
+            suggestedTryDevicesList.sort((a,b)=>a.wtime-b.wtime)
+            suggestedWaitDevicesList.sort((a,b)=>a.time-b.time)
+
         }).catch(function (err) {
             console.log(err)
             return [];
@@ -57,6 +71,18 @@ function refreshDevices() {
             washCount.value = json.avgWashCount
             avgWashTimeText.value = formatDate(json.avgWashTime)
             requestTimes.value = json.requestTimes
+            suggestedTryDevicesList=[]
+            suggestedWaitDevicesList=[]
+            out.forEach(element=>{
+                if(element.status==1 && (new Date().getTime()-element.wtime)>360000){
+                    suggestedTryDevicesList.push(element)
+                }
+                if(element.status==2 && (new Date().getTime()-element.time)>json.avgWashTime){
+                    suggestedWaitDevicesList.push(element)
+                }
+            })
+            suggestedTryDevicesList.sort((a,b)=>a.wtime-b.wtime)
+            suggestedWaitDevicesList.sort((a,b)=>a.time-b.time)
             console.log("refresh devices")
         }).catch(function (err) {
             console.log(err)
@@ -78,10 +104,32 @@ setInterval(() => {
     <div class="app_detail">
         当前统计洗浴次数：{{ washCount }}，平均洗浴时间：{{ avgWashTimeText }}，第 {{ requestTimes }} 个使用本工具。
     </div>
-    <div class="app_container" v-for="device in devicesList">
-        <Device :name="device.name" :id="device.id" :status="device.status" :tme="device.time" :wtime="device.wtime" />
+    <div class="top_container">
+        <div class="suggested_tips">
+            推荐去尝试可能没人的淋浴头：
+        </div>
+        <div class="suggested_container" v-for="device in suggestedTryDevicesList">
+            <SuggestedDevice :name="device.name" :id="device.id" :status="device.status" :tme="device.wtime"/>
+        </div>
+    </div>
+    <div class="top_container">
+        
+        <div class="suggested_tips">
+            推荐去尝试马上使用完毕的淋浴头：
+        </div>
+        <div class="suggested_container" v-for="device in suggestedWaitDevicesList">
+            <SuggestedDevice :name="device.name" :id="device.id" :status="device.status" :tme="device.time"/>
+        </div>
+    </div>
+    <div class="app_container">
+        <div class="device_container" v-for="device in devicesList">
+            <Device :name="device.name" :id="device.id" :status="device.status" :tme="device.time" :wtime="device.wtime" />
+        </div>
     </div>
 </template>
 
 <style>
+.app_container{
+    padding-top: 10px;
+}
 </style>
