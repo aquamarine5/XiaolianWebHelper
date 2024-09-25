@@ -44,15 +44,18 @@ function getDevices() {
             console.log(out)
             devicesList = out;
             out.forEach(element=>{
-                if(element.status==1 && (new Date().getTime()-element.wtime)>360000 && suggestedTryDevicesList.length<6){
+                if(element.status==1 && (new Date().getTime()-element.wtime)>360000){
                     suggestedTryDevicesList.push(element)
                 }
-                if(element.status==2 && (new Date().getTime()-element.time)>json.avgWashTime && suggestedWaitDevicesList.length<6){
+                if(element.status==2 && (new Date().getTime()-element.time)>json.avgWashTime){
                     suggestedWaitDevicesList.push(element)
                 }
             })
             suggestedTryDevicesList.sort((a,b)=>a.wtime-b.wtime)
             suggestedWaitDevicesList.sort((a,b)=>a.time-b.time)
+            
+            suggestedTryDevicesList=suggestedTryDevicesList.slice(0,6)
+            suggestedWaitDevicesList=suggestedWaitDevicesList.slice(0,6)
 
         }).catch(function (err) {
             console.log(err)
@@ -73,7 +76,7 @@ function refreshDevices() {
             requestTimes.value = json.requestTimes
             suggestedTryDevicesList=[]
             suggestedWaitDevicesList=[]
-            out.forEach(element=>{
+            devicesList.forEach(element=>{
                 if(element.status==1 && (new Date().getTime()-element.wtime)>360000){
                     suggestedTryDevicesList.push(element)
                 }
@@ -83,6 +86,8 @@ function refreshDevices() {
             })
             suggestedTryDevicesList.sort((a,b)=>a.wtime-b.wtime)
             suggestedWaitDevicesList.sort((a,b)=>a.time-b.time)
+            suggestedTryDevicesList=suggestedTryDevicesList.slice(0,6)
+            suggestedWaitDevicesList=suggestedWaitDevicesList.slice(0,6)
             console.log("refresh devices")
         }).catch(function (err) {
             console.log(err)
