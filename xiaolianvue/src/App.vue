@@ -1,10 +1,21 @@
 <script setup lang="js">
 import axios from 'axios';
 import Device from './components/Device.vue';
+import SuggestedDevice from './components/SuggestedDevice.vue';
+import ResidenceList from './components/ResidenceList.vue';
+
 var washCount = defineModel('washCount')
 var avgWashTimeText = defineModel('avgWashTimeText')
 var requestTimes = defineModel('requestTimes')
-var devicesList=[]
+var devicesList = []
+var suggestedWaitDevicesList = []
+var suggestedTryDevicesList = []
+
+var residenceId=sessionStorage.getItem("residenceId")
+if(residenceId==null){
+    residenceId=1215856
+    sessionStorage.setItem("residenceId",1215856)
+}
 
 function formatDate(t) {
     var seconds = Math.floor((t / 1000) % 60),
@@ -21,7 +32,7 @@ function formatDate(t) {
 }
 
 function getDevices() {
-    axios.get("http://47.96.24.132/api/wash")
+    axios.get("http://47.96.24.132/api/wash?id="+sessionStorage.getItem("residenceId"))
         .then(response => {
             var json = response.data
             var out = []
@@ -37,32 +48,63 @@ function getDevices() {
             washCount.value = json.avgWashCount
             avgWashTimeText.value = formatDate(json.avgWashTime)
             requestTimes.value = json.requestTimes
-
             console.log(out)
             devicesList = out;
+            out.forEach(element => {
+                if (element.status == 1 && (new Date().getTime() - element.wtime) > 360000) {
+                    suggestedTryDevicesList.push(element)
+                }
+                if (element.status == 2 && (new Date().getTime() - element.time) > json.avgWashTime) {
+                    suggestedWaitDevicesList.push(element)
+                }
+            })
+            suggestedTryDevicesList.sort((a, b) => a.wtime - b.wtime)
+            suggestedWaitDevicesList.sort((a, b) => a.time - b.time)
+
+            suggestedTryDevicesList = suggestedTryDevicesList.slice(0, 20)
+            suggestedWaitDevicesList = suggestedWaitDevicesList.slice(0, 20)
+
         }).catch(function (err) {
             console.log(err)
             return [];
         })
 }
 function refreshDevices() {
-    axios.get("http://47.96.24.132/api/refresh")
+    axios.get("http://47.96.24.132/api/refresh?id="+sessionStorage.getItem("residenceId"))
         .then(response => {
             var json = response.data
             json["devices"].forEach(element => {
                 devicesList[element.id - 1].status = element.status
                 devicesList[element.id - 1].time = element.time
             })
-            
             washCount.value = json.avgWashCount
             avgWashTimeText.value = formatDate(json.avgWashTime)
             requestTimes.value = json.requestTimes
+            suggestedTryDevicesList = []
+            suggestedWaitDevicesList = []
+            devicesList.forEach(element => {
+                if (element.status == 1 && (new Date().getTime() - element.wtime) > 360000) {
+                    suggestedTryDevicesList.push(element)
+                }
+                if (element.status == 2 && (new Date().getTime() - element.time) > json.avgWashTime) {
+                    suggestedWaitDevicesList.push(element)
+                }
+            })
+            suggestedTryDevicesList.sort((a, b) => a.wtime - b.wtime)
+            suggestedWaitDevicesList.sort((a, b) => a.time - b.time)
+            suggestedTryDevicesList = suggestedTryDevicesList.slice(0, 20)
+            suggestedWaitDevicesList = suggestedWaitDevicesList.slice(0, 20)
             console.log("refresh devices")
         }).catch(function (err) {
             console.log(err)
             return out;
         })
 }
+
+var showTryMoreStatus = defineModel('showTryMoreStatus')
+var showWaitMoreStatus = defineModel('showWaitMoreStatus')
+showTryMoreStatus.value = false
+showWaitMoreStatus.value = false
 
 getDevices()
 setInterval(() => {
@@ -78,10 +120,61 @@ setInterval(() => {
     <div class="app_detail">
         当前统计洗浴次数：{{ washCount }}，平均洗浴时间：{{ avgWashTimeText }}，第 {{ requestTimes }} 个使用本工具。
     </div>
-    <div class="app_container" v-for="device in devicesList">
-        <Device :name="device.name" :id="device.id" :status="device.status" :tme="device.time" :wtime="device.wtime" />
+    <ResidenceList/>
+    <div class="top_container">
+        <div class="suggested_tips">
+            推荐去尝试可能没人的淋浴头：
+        </div>
+        <div class="suggested_container" v-for="device in suggestedTryDevicesList.slice(0, 6)">
+            <SuggestedDevice :name="device.name" :id="device.id" :status="device.status" :tme="device.wtime"  :key="device.id"/>
+        </div>
+        <div class="suggested_more_container" v-if="showTryMoreStatus">
+            <div class="suggested_container" v-for="mdevice in suggestedTryDevicesList.slice(6, 20)">
+                <SuggestedDevice :name="mdevice.name" :id="mdevice.id" :status="mdevice.status" :tme="mdevice.wtime"  :key="mdevice.id"/>
+            </div>
+        </div>
+        <div class="suggested_more_btn" @click="showTryMoreStatus = !showTryMoreStatus">
+            {{ showTryMoreStatus ? "收起" : "展开" }}
+        </div>
+    </div>
+    <div class="top_container">
+
+        <div class="suggested_tips">
+            推荐去尝试马上使用完毕的淋浴头：
+        </div>
+        <div class="suggested_container" v-for="device in suggestedWaitDevicesList.slice(0, 6)">
+            <SuggestedDevice :name="device.name" :id="device.id" :status="device.status" :tme="device.wtime" :key="device.id"/>
+        </div>
+        <div class="suggested_more_container" v-if="showWaitMoreStatus">
+            <div class="suggested_container" v-for="mdevice in suggestedWaitDevicesList.slice(6, 20)">
+                <SuggestedDevice :name="mdevice.name" :id="mdevice.id" :status="mdevice.status" :tme="mdevice.wtime"  :key="mdevice.id"/>
+            </div>
+        </div>
+        <div class="suggested_more_btn" @click="showWaitMoreStatus = !showWaitMoreStatus">
+            {{ showWaitMoreStatus ? "收起" : "展开" }}
+        </div>
+    </div>
+    <div class="app_container">
+        <div class="device_container" v-for="device in devicesList">
+            <Device :name="device.name" :id="device.id" :status="device.status" :tme="device.time"
+                :wtime="device.wtime" />
+        </div>
     </div>
 </template>
 
 <style>
+.suggested_more_btn {
+    cursor: pointer;
+    border-radius: 5px;
+    padding: 1px;
+    border-width: 2px;
+    border-style: solid;
+    width: fit-content;
+    border-color: gray;
+    margin-block: 3px;
+}
+
+.app_container {
+    padding-top: 10px;
+}
 </style>

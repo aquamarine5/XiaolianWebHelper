@@ -8,22 +8,21 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
 
 @RestController
 public class WasherHelper {
-
-    @Autowired
-    WasherDeviceRepository repository;
-
     @Autowired
     JdbcTemplate jdbcTemplate;
 
     @CrossOrigin(origins = "*")
     @RequestMapping("/wash")
-    public String GetWash() {
+    public String GetWash(@RequestParam("id") int id) {
         JSONObject jsonObject = new JSONObject();
-        SqlRowSet rs = jdbcTemplate.queryForRowSet("SELECT * FROM `1215856`");
+        SqlRowSet rs = jdbcTemplate.queryForRowSet(String.format("SELECT * FROM `%d`",id));
         SqlRowSet dataResult = jdbcTemplate.queryForRowSet("SELECT * FROM `data`");
         JSONArray devicesList = jsonObject.putArray("devices");
         while (rs.next()) {
@@ -36,7 +35,6 @@ public class WasherHelper {
             devicesList.add(device);
         }
         if(dataResult.next()){
-
             jdbcTemplate.execute("UPDATE `data` SET requestTimes = requestTimes + 1");
             jsonObject.put("avgWashTime", dataResult.getLong("avgWashTime"));
             jsonObject.put("avgWashCount", dataResult.getLong("avgWashCount"));
@@ -47,9 +45,9 @@ public class WasherHelper {
 
     @CrossOrigin(origins = "*")
     @RequestMapping("/refresh")
-    public String GetWashData() {
+    public String GetWashData(@RequestParam("id") int id) {
         JSONObject jsonObject = new JSONObject();
-        SqlRowSet rs = jdbcTemplate.queryForRowSet("SELECT * FROM `1215856`");
+        SqlRowSet rs = jdbcTemplate.queryForRowSet(String.format("SELECT * FROM `%d`",id));
         SqlRowSet dataResult = jdbcTemplate.queryForRowSet("SELECT * FROM `data`");
         JSONArray devicesList = jsonObject.putArray("devices");
         while (rs.next()) {
@@ -57,12 +55,10 @@ public class WasherHelper {
             device.put("id", rs.getInt("displayNo"));
             device.put("status", rs.getInt("status"));
             device.put("time", rs.getTimestamp("lastUsedTime").getTime());
-
             device.put("wtime",rs.getTimestamp("lastWashTime").getTime());
             devicesList.add(device);
         }
         if(dataResult.next()){
-
             jsonObject.put("avgWashTime", dataResult.getLong("avgWashTime"));
             jsonObject.put("avgWashCount", dataResult.getLong("avgWashCount"));
             jsonObject.put("requestTimes", dataResult.getInt("requestTimes"));
