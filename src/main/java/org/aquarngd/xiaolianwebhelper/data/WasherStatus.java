@@ -6,7 +6,7 @@ public enum WasherStatus {
     FAULT(0);
 
     private final int id;
-    private WasherStatus(int id){
+    WasherStatus(int id){
         this.id=id;
     }
     public int value(){

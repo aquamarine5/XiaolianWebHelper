@@ -70,7 +70,6 @@ function refreshDevices() {
                 devicesList[element.id - 1].status = element.status
                 devicesList[element.id - 1].time = element.time
             })
-
             washCount.value = json.avgWashCount
             avgWashTimeText.value = formatDate(json.avgWashTime)
             requestTimes.value = json.requestTimes
@@ -114,6 +113,7 @@ setInterval(() => {
     <div class="app_detail">
         当前统计洗浴次数：{{ washCount }}，平均洗浴时间：{{ avgWashTimeText }}，第 {{ requestTimes }} 个使用本工具。
     </div>
+    
     <div class="top_container">
         <div class="suggested_tips">
             推荐去尝试可能没人的淋浴头：
