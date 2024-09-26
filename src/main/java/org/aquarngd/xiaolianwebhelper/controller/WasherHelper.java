@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 @RestController
 public class WasherHelper {
     @Autowired
@@ -62,11 +64,5 @@ public class WasherHelper {
             jsonObject.put("requestTimes", dataResult.getInt("requestTimes"));
         }
         return jsonObject.toJSONString();
-    }
-
-    @CrossOrigin(origins = "*")
-    @RequestMapping("/list")
-    public String GetResidenceList(){
-        return "";
     }
 }

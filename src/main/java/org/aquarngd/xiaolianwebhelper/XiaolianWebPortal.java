@@ -19,10 +19,7 @@ import java.sql.SQLException;
 import java.util.Objects;
 
 public class XiaolianWebPortal {
-    @Autowired
-    JdbcTemplate jdbcTemplate;
-
-
+    
     Logger logger;
     String accessToken="";
     String refreshToken="";
@@ -34,18 +31,20 @@ public class XiaolianWebPortal {
     public XiaolianWebPortal(XiaolianwebhelperApplication application){
         logger= LoggerFactory.getLogger(XiaolianWebPortal.class);
         this.application=application;
+    }
 
+    JdbcTemplate getJdbcTemplate(){
+        return application.getJdbcTemplate();
+    }
+    public HttpHeaders getHttpHeaders(@Nullable String referer){
         if (!isDatabaseExisted()) {
             createDatabase();
             logger.debug("sql: create data table");
-            jdbcTemplate.execute(String.format("INSERT INTO `data` (accessToken,refreshToken) VALUES ('%s', '%s')",
+            getJdbcTemplate().execute(String.format("INSERT INTO `data` (accessToken,refreshToken) VALUES ('%s', '%s')",
                     "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI1NzQ1ODcwIiwib3MiOiIwIiwiaXNzIjoiaHR0cHM6Ly94aWFvbGlhbi5pbyIsImlhdCI6MTcyNjkwODcyOSwiZXhwIjoxNzI2OTI2NzI5fQ.WK85D2fwxnd6SsWs8KKBKhm75nBki8C7q_Cs331iazIFo6Ji5JxW7lC2wVkBHcd4XoAnFMI9tUWpOI5rXBMVpg",
                     "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI1NzQ1ODcwIiwib3MiOiIwIiwiaXNzIjoiaHR0cHM6Ly94aWFvbGlhbi5pbyIsImlhdCI6MTcyNjkwODcyOSwiZXhwIjoxNzI4MjA0NzI5fQ.Bv2wkS8m7O2gHOfDjxFPRHpBgis4KbXO1R-_Kp0ly3ohPjL9hDQWev66_XjGU0DrnS59B5ZWG0MSh7aPi86SBg"));
 
         }
-    }
-
-    public HttpHeaders getHttpHeaders(@Nullable String referer){
         if(Objects.equals(accessToken, "")) getTokens();
         HttpHeaders httpHeaders=new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
@@ -57,7 +56,7 @@ public class XiaolianWebPortal {
     }
 
     private void createDatabase() {
-        jdbcTemplate.execute("""
+        getJdbcTemplate().execute("""
                 CREATE TABLE xiaolian.data (
                 accessToken TEXT NOT NULL,
                 refreshToken TEXT NOT NULL,
@@ -84,7 +83,7 @@ public class XiaolianWebPortal {
     }
     private void getTokens() {
 
-        SqlRowSet rs = jdbcTemplate.queryForRowSet("SELECT * FROM `data`");
+        SqlRowSet rs = getJdbcTemplate().queryForRowSet("SELECT * FROM `data`");
         if (rs.next()) {
             accessToken=rs.getString("accessToken");
             refreshToken=rs.getString("refreshToken");
@@ -101,8 +100,8 @@ public class XiaolianWebPortal {
             logger.info("sql: login response: {}", response.toJSONString());
             String newAccessToken = response.getJSONObject("data").getString("accessToken");
             String newRefreshToken = response.getJSONObject("data").getString("refreshToken");
-            jdbcTemplate.execute("UPDATE `data` SET accessToken = '" + newAccessToken + "'");
-            jdbcTemplate.execute("UPDATE `data` SET refreshToken = '" + newRefreshToken + "'");
+            getJdbcTemplate().execute("UPDATE `data` SET accessToken = '" + newAccessToken + "'");
+            getJdbcTemplate().execute("UPDATE `data` SET refreshToken = '" + newRefreshToken + "'");
             accessToken=newAccessToken;
             refreshToken=newRefreshToken;
         }
@@ -114,13 +113,12 @@ public class XiaolianWebPortal {
         HttpEntity<JSONObject> httpPostEntity = new HttpEntity<>(data, getHttpHeaders(referer));
         ResponseEntity<JSONObject> postResponse=null;
         try{
-
              postResponse= restTemplate.postForEntity(url, httpPostEntity, JSONObject.class);
         }
         catch (HttpClientErrorException e) {
             if (e.getStatusCode() == HttpStatusCode.valueOf(401)) {
                 relogin();
-                postResponse= restTemplate.postForEntity(url, httpPostEntity, JSONObject.class);
+                postResponse= restTemplate.postForEntity(url, new HttpEntity<>(data, getHttpHeaders(referer)), JSONObject.class);
             }
             logger.info("error 401: {}", e.getResponseBodyAsString());
         }
@@ -131,7 +129,7 @@ public class XiaolianWebPortal {
         Connection connection = null;
         ResultSet rs = null;
         try {
-            connection = Objects.requireNonNull(jdbcTemplate.getDataSource()).getConnection();
+            connection = Objects.requireNonNull(getJdbcTemplate().getDataSource()).getConnection();
             DatabaseMetaData data = connection.getMetaData();
             String[] types = {"TABLE"};
             rs = data.getTables(null, null, "data", types);

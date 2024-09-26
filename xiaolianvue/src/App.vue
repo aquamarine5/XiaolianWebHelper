@@ -2,6 +2,7 @@
 import axios from 'axios';
 import Device from './components/Device.vue';
 import SuggestedDevice from './components/SuggestedDevice.vue';
+import ResidenceList from './components/ResidenceList.vue';
 
 var washCount = defineModel('washCount')
 var avgWashTimeText = defineModel('avgWashTimeText')
@@ -9,6 +10,12 @@ var requestTimes = defineModel('requestTimes')
 var devicesList = []
 var suggestedWaitDevicesList = []
 var suggestedTryDevicesList = []
+
+var residenceId=sessionStorage.getItem("residenceId")
+if(residenceId==null){
+    residenceId=1215856
+    sessionStorage.setItem("residenceId",1215856)
+}
 
 function formatDate(t) {
     var seconds = Math.floor((t / 1000) % 60),
@@ -25,7 +32,7 @@ function formatDate(t) {
 }
 
 function getDevices() {
-    axios.get("http://47.96.24.132/api/wash")
+    axios.get("http://47.96.24.132/api/wash?id="+sessionStorage.getItem("residenceId"))
         .then(response => {
             var json = response.data
             var out = []
@@ -63,7 +70,7 @@ function getDevices() {
         })
 }
 function refreshDevices() {
-    axios.get("http://47.96.24.132/api/refresh")
+    axios.get("http://47.96.24.132/api/refresh?id="+sessionStorage.getItem("residenceId"))
         .then(response => {
             var json = response.data
             json["devices"].forEach(element => {
@@ -113,7 +120,7 @@ setInterval(() => {
     <div class="app_detail">
         当前统计洗浴次数：{{ washCount }}，平均洗浴时间：{{ avgWashTimeText }}，第 {{ requestTimes }} 个使用本工具。
     </div>
-    
+    <ResidenceList/>
     <div class="top_container">
         <div class="suggested_tips">
             推荐去尝试可能没人的淋浴头：
