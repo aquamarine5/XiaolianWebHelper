@@ -126,11 +126,11 @@ setInterval(() => {
             推荐去尝试可能没人的淋浴头：
         </div>
         <div class="suggested_container" v-for="device in suggestedTryDevicesList.slice(0, 6)">
-            <SuggestedDevice :name="device.name" :id="device.id" :status="device.status" :tme="device.wtime" />
+            <SuggestedDevice :name="device.name" :id="device.id" :status="device.status" :tme="device.wtime"  :key="device.id"/>
         </div>
         <div class="suggested_more_container" v-if="showTryMoreStatus">
             <div class="suggested_container" v-for="mdevice in suggestedTryDevicesList.slice(6, 20)">
-                <SuggestedDevice :name="mdevice.name" :id="mdevice.id" :status="mdevice.status" :tme="mdevice.wtime" />
+                <SuggestedDevice :name="mdevice.name" :id="mdevice.id" :status="mdevice.status" :tme="mdevice.wtime"  :key="mdevice.id"/>
             </div>
         </div>
         <div class="suggested_more_btn" @click="showTryMoreStatus = !showTryMoreStatus">
@@ -143,11 +143,11 @@ setInterval(() => {
             推荐去尝试马上使用完毕的淋浴头：
         </div>
         <div class="suggested_container" v-for="device in suggestedWaitDevicesList.slice(0, 6)">
-            <SuggestedDevice :name="device.name" :id="device.id" :status="device.status" :tme="device.wtime" />
+            <SuggestedDevice :name="device.name" :id="device.id" :status="device.status" :tme="device.wtime" :key="device.id"/>
         </div>
         <div class="suggested_more_container" v-if="showWaitMoreStatus">
             <div class="suggested_container" v-for="mdevice in suggestedWaitDevicesList.slice(6, 20)">
-                <SuggestedDevice :name="mdevice.name" :id="mdevice.id" :status="mdevice.status" :tme="mdevice.wtime" />
+                <SuggestedDevice :name="mdevice.name" :id="mdevice.id" :status="mdevice.status" :tme="mdevice.wtime"  :key="mdevice.id"/>
             </div>
         </div>
         <div class="suggested_more_btn" @click="showWaitMoreStatus = !showWaitMoreStatus">
@@ -165,6 +165,13 @@ setInterval(() => {
 <style>
 .suggested_more_btn {
     cursor: pointer;
+    border-radius: 5px;
+    padding: 1px;
+    border-width: 2px;
+    border-style: solid;
+    width: fit-content;
+    border-color: gray;
+    margin-block: 3px;
 }
 
 .app_container {
