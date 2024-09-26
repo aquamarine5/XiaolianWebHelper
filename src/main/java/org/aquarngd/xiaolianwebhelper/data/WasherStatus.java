@@ -17,8 +17,7 @@ public enum WasherStatus {
         return switch (value) {
             case 1 -> NOT_USING;
             case 2 -> USING;
-            case 0 -> FAULT;
-            default -> null;
+            default -> FAULT;
         };
     }
 }
