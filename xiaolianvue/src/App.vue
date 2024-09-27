@@ -3,6 +3,8 @@ import axios from 'axios';
 import Device from './components/Device.vue';
 import SuggestedDevice from './components/SuggestedDevice.vue';
 import ResidenceList from './components/ResidenceList.vue';
+import Topbar from './components/Topbar.vue';
+import Introduction from './components/Introduction.vue';
 
 var washCount = defineModel('washCount')
 var avgWashTimeText = defineModel('avgWashTimeText')
@@ -11,10 +13,10 @@ var devicesList = []
 var suggestedWaitDevicesList = []
 var suggestedTryDevicesList = []
 
-var residenceId=sessionStorage.getItem("residenceId")
-if(residenceId==null){
-    residenceId=1215856
-    sessionStorage.setItem("residenceId",1215856)
+var residenceId = sessionStorage.getItem("residenceId")
+if (residenceId == null) {
+    residenceId = 1215856
+    sessionStorage.setItem("residenceId", 1215856)
 }
 
 function formatDate(t) {
@@ -32,7 +34,7 @@ function formatDate(t) {
 }
 
 function getDevices() {
-    axios.get("http://47.96.24.132/api/wash?id="+sessionStorage.getItem("residenceId"))
+    axios.get("http://47.96.24.132/api/wash?id=" + sessionStorage.getItem("residenceId"))
         .then(response => {
             var json = response.data
             var out = []
@@ -70,7 +72,7 @@ function getDevices() {
         })
 }
 function refreshDevices() {
-    axios.get("http://47.96.24.132/api/refresh?id="+sessionStorage.getItem("residenceId"))
+    axios.get("http://47.96.24.132/api/refresh?id=" + sessionStorage.getItem("residenceId"))
         .then(response => {
             var json = response.data
             json["devices"].forEach(element => {
@@ -114,52 +116,55 @@ setInterval(() => {
 </script>
 
 <template>
-    <a href="https://github.com/aquamarine5/XiaolianWebHelper">
-        Github项目链接
-    </a>
-    <div class="app_detail">
-        当前统计洗浴次数：{{ washCount }}，平均洗浴时间：{{ avgWashTimeText }}，第 {{ requestTimes }} 个使用本工具。
-    </div>
-    <ResidenceList/>
-    <div class="top_container">
-        <div class="suggested_tips">
-            推荐去尝试可能没人的淋浴头：
-        </div>
-        <div class="suggested_container" v-for="device in suggestedTryDevicesList.slice(0, 6)">
-            <SuggestedDevice :name="device.name" :id="device.id" :status="device.status" :tme="device.wtime"  :key="device.id"/>
-        </div>
-        <div class="suggested_more_container" v-if="showTryMoreStatus">
-            <div class="suggested_container" v-for="mdevice in suggestedTryDevicesList.slice(6, 20)">
-                <SuggestedDevice :name="mdevice.name" :id="mdevice.id" :status="mdevice.status" :tme="mdevice.wtime"  :key="mdevice.id"/>
+    <Topbar :wash-avg-time="avgWashTimeText" :use-count="requestTimes" :wash-count="washCount" />
+    <div style="margin: 10px;">
+        <ResidenceList />
+        <Introduction/>
+        <div class="top_container">
+            <div class="suggested_tips">
+                推荐去尝试可能没人的淋浴头：
+            </div>
+            <div class="suggested_container" v-for="device in suggestedTryDevicesList.slice(0, 6)">
+                <SuggestedDevice :name="device.name" :id="device.id" :status="device.status" :tme="device.wtime"
+                    :key="device.id" />
+            </div>
+            <div class="suggested_more_container" v-if="showTryMoreStatus">
+                <div class="suggested_container" v-for="mdevice in suggestedTryDevicesList.slice(6, 20)">
+                    <SuggestedDevice :name="mdevice.name" :id="mdevice.id" :status="mdevice.status" :tme="mdevice.wtime"
+                        :key="mdevice.id" />
+                </div>
+            </div>
+            <div class="suggested_more_btn" @click="showTryMoreStatus = !showTryMoreStatus">
+                {{ showTryMoreStatus ? "收起" : "展开" }}
             </div>
         </div>
-        <div class="suggested_more_btn" @click="showTryMoreStatus = !showTryMoreStatus">
-            {{ showTryMoreStatus ? "收起" : "展开" }}
-        </div>
-    </div>
-    <div class="top_container">
+        <div class="top_container">
 
-        <div class="suggested_tips">
-            推荐去尝试马上使用完毕的淋浴头：
-        </div>
-        <div class="suggested_container" v-for="device in suggestedWaitDevicesList.slice(0, 6)">
-            <SuggestedDevice :name="device.name" :id="device.id" :status="device.status" :tme="device.wtime" :key="device.id"/>
-        </div>
-        <div class="suggested_more_container" v-if="showWaitMoreStatus">
-            <div class="suggested_container" v-for="mdevice in suggestedWaitDevicesList.slice(6, 20)">
-                <SuggestedDevice :name="mdevice.name" :id="mdevice.id" :status="mdevice.status" :tme="mdevice.wtime"  :key="mdevice.id"/>
+            <div class="suggested_tips">
+                推荐去尝试马上使用完毕的淋浴头：
+            </div>
+            <div class="suggested_container" v-for="device in suggestedWaitDevicesList.slice(0, 6)">
+                <SuggestedDevice :name="device.name" :id="device.id" :status="device.status" :tme="device.wtime"
+                    :key="device.id" />
+            </div>
+            <div class="suggested_more_container" v-if="showWaitMoreStatus">
+                <div class="suggested_container" v-for="mdevice in suggestedWaitDevicesList.slice(6, 20)">
+                    <SuggestedDevice :name="mdevice.name" :id="mdevice.id" :status="mdevice.status" :tme="mdevice.wtime"
+                        :key="mdevice.id" />
+                </div>
+            </div>
+            <div class="suggested_more_btn" @click="showWaitMoreStatus = !showWaitMoreStatus">
+                {{ showWaitMoreStatus ? "收起" : "展开" }}
             </div>
         </div>
-        <div class="suggested_more_btn" @click="showWaitMoreStatus = !showWaitMoreStatus">
-            {{ showWaitMoreStatus ? "收起" : "展开" }}
+        <div class="app_container">
+            <div class="device_container" v-for="device in devicesList">
+                <Device :name="device.name" :id="device.id" :status="device.status" :tme="device.time"
+                    :wtime="device.wtime" />
+            </div>
         </div>
     </div>
-    <div class="app_container">
-        <div class="device_container" v-for="device in devicesList">
-            <Device :name="device.name" :id="device.id" :status="device.status" :tme="device.time"
-                :wtime="device.wtime" />
-        </div>
-    </div>
+
 </template>
 
 <style>
