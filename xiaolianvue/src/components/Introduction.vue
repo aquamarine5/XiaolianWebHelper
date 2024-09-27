@@ -5,7 +5,7 @@ import { ElIcon } from 'element-plus';
 <template>
     <div class="introduction_bg">
         <ElIcon size="28" color="white" class="introduction_icon">
-            <StarFilled/>
+            <Opportunity/>
         </ElIcon>
         <div class="introduction_container">
             <div class="introduction_title">
@@ -28,7 +28,7 @@ import { ElIcon } from 'element-plus';
     background-color: #ffd000;
     display: flex;
     align-items: center;
-    padding: 7px;
+    padding: 10px 7px;
     border-radius: 10px;
     font-weight: 400;
     

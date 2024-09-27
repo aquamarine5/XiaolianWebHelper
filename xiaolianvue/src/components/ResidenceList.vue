@@ -19,7 +19,7 @@ function onChangeSelectedValue(value) {
 </script>
 
 <template>
-    <div class="residenceList" >
+    <div class="residenceList">
         <div class="residenceList_tips">
             请选择要查询的宿舍：
         </div>
@@ -51,21 +51,12 @@ function onChangeSelectedValue(value) {
     padding-left: 7px;
 }
 .residenceList{
+    background-color:#BDBDBD;
     display: flex;
     align-items: center;
-    padding-bottom: 7px;
+    padding: 7px 7px 12px 14px;
+    border-radius: 10px 10px;
 }
-.residenceList_btn {
-    border-width: 2px;
-    border-color: black;
-    cursor: pointer;
-    padding: 5px;
-    border-radius: 10px;
-    border-style: solid;
-    width: fit-content;
-    margin: 5px;
-}
-
 .residenceList_select {
     display: flex;
     align-items: center;
@@ -74,6 +65,7 @@ function onChangeSelectedValue(value) {
 }
 
 .residenceList_notice {
+    margin-top: -7px;
     font-weight: 400;
     color: white;
     font-size: smaller;
@@ -81,6 +73,6 @@ function onChangeSelectedValue(value) {
     display: flex;
     align-items: center;
     padding: 7px;
-    border-radius: 10px;
+    border-radius: 0px 0px 10px 10px;
 }
 </style>
