@@ -9,16 +9,23 @@ name: Java CI with Gradle
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "**-dev"]
+    paths-ignore:
+      - 'xiaolianvue/**'
+      - 'README.md'
+      - '.github/**'
+    
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "**-dev" ]
+    paths-ignore:
+      - 'xiaolianvue/**'
+      - 'README.md'
+      - '.github/**'
 
 jobs:
   build:
 
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
 
     steps:
     - uses: actions/checkout@v4
