@@ -47,8 +47,8 @@ function onChangeSelectedValue(value) {
 
 <style>
 .residenceList_notice_icon{
-    padding-right: 10px;
-    padding-left: 7px;
+    padding-right: 11px;
+    padding-left: 8px;
 }
 .residenceList{
     background-color:#BDBDBD;

@@ -30,14 +30,15 @@ public class XiaolianwebhelperApplication {
 
     Logger logger;
 
+    @Autowired
     public XiaolianWebPortal webPortal;
+
+    @Autowired
     public ResidenceController residenceController;
 
     public XiaolianwebhelperApplication() {
         logger = LoggerFactory.getLogger(XiaolianwebhelperApplication.class);
         logger.info("XiaolianWebHelper launched.");
-        webPortal=new XiaolianWebPortal(this);
-        residenceController=new ResidenceController(this);
     }
 
     public static void main(String[] args) {
@@ -49,7 +50,7 @@ public class XiaolianwebhelperApplication {
     }
 
     @Async
-    @Scheduled(cron = "0/10 * 13-23 * * ? ")
+    @Scheduled(cron = "0/10 * 13-22 * * ? ")
     public void refreshWasherDevicesData() {
         residenceController.updateAllResidences();
     }

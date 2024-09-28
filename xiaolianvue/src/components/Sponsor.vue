@@ -31,8 +31,8 @@ function click(){
 
 <style>
 .sponsor_icon{
-    padding-right: 8px;
-    padding-left: 5px;
+    padding-right: 10px;
+    padding-left: 7px;
 }
 .sponsor_bg{
     cursor: pointer;

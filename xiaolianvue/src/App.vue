@@ -6,6 +6,7 @@ import ResidenceList from './components/ResidenceList.vue';
 import Topbar from './components/Topbar.vue';
 import Introduction from './components/Introduction.vue';
 import Sponsor from './components/Sponsor.vue';
+import WarningNotRunning from './components/WarningNotRunning.vue';
 
 var washCount = defineModel('washCount')
 var avgWashTimeText = defineModel('avgWashTimeText')
@@ -70,6 +71,8 @@ function getDevices() {
         })
 }
 function refreshDevices() {
+    var hour=new Date().getHours()
+    if(hour<13||hour>23) return;
     axios.get("http://47.96.24.132/api/refresh?id=" + sessionStorage.getItem("residenceId"))
         .then(response => {
             var json = response.data
@@ -118,6 +121,7 @@ timer = setInterval(() => {
     <div style="margin: 10px;">
         <ResidenceList />
         <Introduction />
+        <WarningNotRunning/>
         <div class="top_container">
             <div class="suggested_tips">
                 推荐去尝试可能没人的淋浴头：
@@ -206,7 +210,7 @@ timer = setInterval(() => {
 .suggested_more_btn {
     cursor: pointer;
     border-radius: 5px;
-    padding: 1px;
+    padding: 0px 1px;
     border-width: 2px;
     border-style: solid;
     width: fit-content;
