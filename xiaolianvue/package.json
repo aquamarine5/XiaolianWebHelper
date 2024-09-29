@@ -1,6 +1,6 @@
 {
   "name": "xiaolianvue",
-  "version": "0.4.9",
+  "version": "0.5.5",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@element-plus/icons-vue": "^2.3.1",
     "axios": "^1.7.7",
     "element-plus": "^2.8.3",
     "vue": "^3.4.29"

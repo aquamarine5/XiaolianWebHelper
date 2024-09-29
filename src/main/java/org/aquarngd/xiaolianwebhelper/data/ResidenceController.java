@@ -7,29 +7,36 @@ import org.aquarngd.xiaolianwebhelper.XiaolianwebhelperApplication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.stereotype.Component;
 
 import java.sql.*;
 import java.util.Map;
 import java.util.Objects;
 
+@ComponentScan("org.aquarngd.xiaolianwebhelper")
+@Component
 public class ResidenceController {
 
     Logger logger;
 
-    XiaolianwebhelperApplication application;
-    XiaolianWebPortal webPortal;
-    private final Integer[] supportedResidenceBuildingsId = new Integer[]{759014, 759935};
+    @Autowired
+    JdbcTemplate jdbcTemplate;
 
-    public ResidenceController(XiaolianwebhelperApplication application) {
+    @Autowired
+    XiaolianWebPortal webPortal;
+
+    private final Integer[] supportedResidenceBuildingsId = new Integer[]{759014, 759935,755637};
+
+    public ResidenceController() {
         logger = LoggerFactory.getLogger(ResidenceController.class);
-        webPortal = application.webPortal;
-        this.application = application;
+        //webPortal = application.webPortal;
     }
 
     JdbcTemplate getJdbcTemplate(){
-        return application.getJdbcTemplate();
+        return jdbcTemplate;
     }
 
     private JSONObject buildIndexResidenceRequest(int buildingId) {
@@ -119,7 +126,7 @@ public class ResidenceController {
                     logger.warn("sql: pass time too large: {}", time);
                 }
             }
-            getJdbcTemplate().execute(String.format("UPDATE `%d` SET status = %d WHERE deviceId = %d",residenceId,deviceStatus.value(),deviceId));
+            getJdbcTemplate().execute(String.format("UPDATE `%d` SET status = %d WHERE deviceId = %d",residenceId,deviceObject.getInteger("deviceStatus"),deviceId));
         } else {
             getJdbcTemplate().execute(String.format("INSERT INTO `%d` (deviceId, location, status, lastUsedTime,lastWashTime, displayNo) VALUES (%d, '%s', %d, NOW(),NOW(), %d)",
                     residenceId,
@@ -145,6 +152,7 @@ public class ResidenceController {
 
     public void updateAllResidences() {
         if (!isDatabaseExisted("residenceIndex")) createResidenceIndexDatabase();
+        logger.info("Update All Residences.");
         SqlRowSet sqlRowSet= getJdbcTemplate().queryForRowSet("SELECT * FROM `residenceIndex`");
         while(sqlRowSet.next()){
             updateResidence(buildUpdateWasherRequest(

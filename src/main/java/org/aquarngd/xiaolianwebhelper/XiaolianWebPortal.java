@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
@@ -18,6 +19,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Objects;
 
+@Component
 public class XiaolianWebPortal {
     
     Logger logger;
@@ -26,15 +28,17 @@ public class XiaolianWebPortal {
 
     XiaolianwebhelperApplication application;
 
+    @Autowired
+    JdbcTemplate jdbcTemplate;
+
     public RestTemplate restTemplate=new RestTemplate();
 
-    public XiaolianWebPortal(XiaolianwebhelperApplication application){
+    public XiaolianWebPortal(){
         logger= LoggerFactory.getLogger(XiaolianWebPortal.class);
-        this.application=application;
     }
 
     JdbcTemplate getJdbcTemplate(){
-        return application.getJdbcTemplate();
+        return jdbcTemplate;
     }
     public HttpHeaders getHttpHeaders(@Nullable String referer){
         if (!isDatabaseExisted()) {
