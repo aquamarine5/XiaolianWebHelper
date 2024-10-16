@@ -7,6 +7,8 @@ import Topbar from './components/Topbar.vue';
 import Introduction from './components/Introduction.vue';
 import Sponsor from './components/Sponsor.vue';
 import WarningNotRunning from './components/WarningNotRunning.vue';
+import Map from './components/Map.vue';
+import { bus } from './bus';
 
 var washCount = defineModel('washCount')
 var avgWashTimeText = defineModel('avgWashTimeText')
@@ -64,6 +66,7 @@ function getDevices() {
             })
             suggestedTryDevicesList = suggestedTryDevicesList.sort((a, b) => a.wtime / 1000 - b.wtime / 1000).slice(0, 20)
             suggestedWaitDevicesList = suggestedWaitDevicesList.sort((a, b) => a.time / 1000 - b.time / 1000).slice(0, 20)
+            bus.$emit("getData",out)
 
         }).catch(function (err) {
             console.log(err)
@@ -95,11 +98,13 @@ function refreshDevices() {
             })
             suggestedTryDevicesList = suggestedTryDevicesList.sort((a, b) => a.wtime - b.wtime).slice(0, 20)
             suggestedWaitDevicesList = suggestedWaitDevicesList.sort((a, b) => a.time - b.time).slice(0, 20)
+            bus.$emit("refreshData",devicesList)
             console.log("refresh devices")
         }).catch(function (err) {
             console.log(err)
             return out;
         })
+
 }
 
 var showTryMoreStatus = defineModel('showTryMoreStatus')
@@ -122,6 +127,7 @@ timer = setInterval(() => {
         <ResidenceList />
         <Introduction />
         <WarningNotRunning/>
+        <Map />
         <div class="top_container">
             <div class="suggested_tips">
                 推荐去尝试可能没人的淋浴头：
