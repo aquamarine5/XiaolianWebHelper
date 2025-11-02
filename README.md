@@ -7,8 +7,8 @@
 > XiaolianShowerSense participated in **Designed an application** and successfully deployed it.
 
 - 适用于任何使用智慧笑联的学校，[http://wash.aquamarine5.fun/](http://wash.aquamarine5.fun/)目前仅适用于河北大学，不过可以更改参数以适配所有宿舍。
-> [!NOTE]
-> 请勿使用HTTPS访问。
+> [!IMPORTANT]
+> 因为昂贵的服务器费用和几乎无人在意的原因，`wash.aquamarine5.fun`的服务器资源已被释放且无法访问。
 
 ## Changelog
 
